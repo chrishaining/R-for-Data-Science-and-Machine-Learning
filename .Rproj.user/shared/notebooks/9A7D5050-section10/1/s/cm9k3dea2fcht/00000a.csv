@@ -1,0 +1,3 @@
+"0","names <- c(""Mazda"", ""Porsche"", ""Lada"", ""Ferrari"", ""Ford"", ""MG"", ""Jaguar"", ""Volvo"", ""VW"", ""Fiat"")"
+"0","my_cars$X <- names"
+"0","my_cars"

@@ -1,0 +1,10 @@
+"0","excel_sheets('cars.xlsx')"
+"1","[1]"
+"1"," ""Sheet1"""
+"1","
+"
+"0","broom <- read_excel('cars.xlsx')"
+"2","New names:
+* `` -> ...1
+"
+"0","broom  "

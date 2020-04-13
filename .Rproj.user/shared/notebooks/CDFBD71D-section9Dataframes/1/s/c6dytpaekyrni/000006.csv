@@ -1,0 +1,2 @@
+"0","# omit a row when displaying data (Mazda RX4 Wag will be omitted)"
+"0","head(mtcars[-2,])"

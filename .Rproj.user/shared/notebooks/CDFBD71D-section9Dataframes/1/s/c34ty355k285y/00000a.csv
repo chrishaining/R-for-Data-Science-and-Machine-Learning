@@ -1,0 +1,2 @@
+"0","colnames(mtcars)[1] <- 'wow'"
+"0","head(mtcars)"

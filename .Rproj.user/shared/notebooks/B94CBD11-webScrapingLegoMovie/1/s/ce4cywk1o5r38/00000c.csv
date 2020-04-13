@@ -1,0 +1,6 @@
+"0","lego_movie %>%"
+"0","  html_nodes(""table"") %>%"
+"0","  .[[3]] %>%"
+"0","  html_table()"
+"2","Error in .[[3]] : subscript out of bounds
+"

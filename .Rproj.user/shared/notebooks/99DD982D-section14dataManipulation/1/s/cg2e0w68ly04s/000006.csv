@@ -1,0 +1,7 @@
+"2","Error: 1 components of `...` were not used.
+
+We detected these problematic arguments:
+* `newCol`
+
+Did you misspecify an argument?
+"

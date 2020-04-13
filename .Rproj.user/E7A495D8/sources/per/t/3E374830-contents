@@ -1,0 +1,114 @@
+---
+title: "Section 14"
+output: html_notebook
+---
+# Data Manipulation
+
+
+## dplyr
+```{r}
+library(dplyr)
+library(nycflights13)
+ head(flights)
+```
+
+```{r}
+head(filter(flights, month==11,day==3,carrier=='AA'))
+
+```
+
+```{r}
+#slice allows you to select rows - here we select the first 10 rows
+slice(flights,1:10)
+```
+
+```{r}
+# arrange by columns
+head(arrange(flights,year,month,day,arr_time))
+```
+
+```{r}
+head(select(flights,carrier))
+```
+
+```{r}
+head(rename(flights,airline_carrier=carrier))
+```
+
+```{r}
+# use distinct to select the unique values in a particular column
+distinct(select(flights,carrier))
+```
+
+```{r}
+head(mutate(flights, new_col=arr_delay-dep_delay))
+```
+
+```{r}
+# transmute is like mutate, but only returns the new column you've created
+head(transmute(flights, new_col=arr_delay-dep_delay))
+```
+
+```{r}
+# use summarise to get a mean. na.rm=TRUE removes any NA values from the sample.
+summarise(flights,avg_air_time=mean(air_time,na.rm=TRUE))
+
+```
+
+```{r}
+# return a random sample of the dataset. The second argument specifies how many rows you want. 
+sample_n(flights,10)
+```
+
+```{r}
+# return a random sample of the dataset. The second argument states the percentage of total rows you want to return (so, 0.1 is 10 percent of all rows)
+sample_frac(flights,0.1)
+```
+
+## using pipe operator %>%
+```{r}
+df <- flights
+
+# whereas the order of a normal nesting of functions is outside to inside, the order of pipe operations is first to last. So, you start with a filter, then take a sample of the filter, then arrange the sample
+result <- df %>% filter(dep_time>530) %>% sample_n(size=5) %>% arrange(desc(year))
+result
+```
+
+## tidyr
+data.table is a dataframe with a few extra features (mainly speed and simpler syntax). It's easy to get them muddled up, but probably not a problem.
+
+```{r}
+library(tidyr)
+library(data.table)
+```
+
+```{r}
+comp <- c(1,1,1,2,2,2,3,3,3)
+yr <- c(1998,1999,2000,1998,1999,2000,1998,1999,2000)
+q1 <- runif(9, min=0,max=100)
+q2 <- runif(9, min=0,max=100)
+q3 <- runif(9, min=0,max=100)
+q4 <- runif(9, min=0,max=100)
+
+df <- data.frame(comp=comp,yr=yr,Qtr1=q1,Qtr2=q2,Qtr3=q3,Qtr4=q4)
+df
+```
+
+## the three Qtr columns might not be the best way to organise this data. Use `gather` to merge the columns.
+```{r}
+# gather, with arguments: dataframe, first new column, second new column, the original columns (can be done as a slice)
+gatheredDf <- gather(df,quarter,revenue,Qtr1:Qtr4)
+gatheredDf
+```
+
+## you can use `spread` to do the opposite of `gather`
+```{r}
+#gatheredDf %>% spread(quarter, Qtr1:Qtr4)
+```
+
+
+```{r}
+
+```
+
+

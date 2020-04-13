@@ -1,0 +1,8 @@
+"0","library(readxl)"
+"0","excel_sheets('Data Input and Output with R/Sample-Sales-Data.xlsx')"
+"1","[1]"
+"1"," ""Sheet1"""
+"1","
+"
+"0","df <- read_excel('Data Input and Output with R/Sample-Sales-Data.xlsx',sheet = ""Sheet1"")"
+"0","head(df)"

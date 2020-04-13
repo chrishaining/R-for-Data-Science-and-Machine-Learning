@@ -1,0 +1,3 @@
+"0","# gather, with arguments: dataframe, first new column, second new column, the original columns (can be done as a slice)"
+"0","gatheredDf <- gather(df,quarter,revenue,Qtr1:Qtr4)"
+"0","gatheredDf"

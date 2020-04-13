@@ -1,0 +1,3 @@
+"0","separate(gatheredDf,newCol=c('ABC','XYZ'))"
+"2","Error: object '' not found
+"

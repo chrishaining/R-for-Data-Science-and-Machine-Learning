@@ -1,0 +1,1 @@
+"0","head(rename(flights,airline_carrier=carrier))"

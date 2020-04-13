@@ -1,0 +1,117 @@
+---
+title: "Section 9: Dataframes"
+output: html_notebook
+---
+
+# lesson 33
+```{r}
+day <- c("Mon","Tue", "Wed","Thur","Fri","Sat","Sun")
+temperature <- c(21, 22, 20, 24, 25, 22, 18)
+rain <- c(T, F, F, F, F, T, T)
+df <- data.frame(day, temperature, rain)
+df
+```
+
+# lesson 34
+```{r}
+#display first row
+df[1,]
+
+#display second column
+df[,2]
+
+#display a particular cell (Did it rain on Saturday?)
+df[6,3]
+
+#display a range of rows(Tue-Thur)
+df[2:4,]
+
+#display a range of nonconsecutive rows (Mon, Wed, Fri, Sun)
+df[c(1,3,5,7),]
+
+
+```
+```{r}
+#display by col name
+df[,'day']
+
+#another way to display by col name
+df$temperature
+```
+
+```{r}
+# display a subset of df
+subset(df, subset = rain==T)
+
+#order the data
+ord <- order(df['temperature']) # is the same as ord <- order(df$temperature)
+ord
+#display the df
+df[ord,]
+
+# order the data by temperature, descending order
+neg <- order(-df['temperature']) # is the same as neg <- order(-df$temperature)
+df[neg,]
+```
+
+```{r}
+#display saturday temperature
+df$temperature[day=='Sat']
+
+#change tuesday rain to True
+df[2,'rain'] <- T
+df
+
+```
+
+```{r}
+head(mtcars)
+```
+
+```{r}
+#display a column as a vector
+mtcars$mpg # same as mtcars[['mpg']]
+```
+```{r}
+#display a column as a dataframe
+mtcars['mpg']
+```
+
+```{r}
+#display multiple columns
+mtcars[c('mpg', 'disp')]
+```
+
+```{r}
+colnames(mtcars)[1] <- 'wow'
+head(mtcars)
+```
+
+```{r}
+# omit a row when displaying data (Mazda RX4 Wag will be omitted)
+head(mtcars[-2,])
+```
+
+```{r}
+# select all the data that meets a certain condition
+mtcars[mtcars$wow > 22,]
+```
+
+```{r}
+# select all the data that meets two conditions
+mtcars[mtcars$wow>22 & mtcars$hp > 100,]
+```
+
+```{r}
+# alternative way to select data based on conditions
+subset(mtcars, wow>22 & hp>100)
+```
+
+## dealing with missing data
+```{r}
+# check if any of the cells contain NA - using any will return a true or false value.
+any(is.na(mtcars))
+
+#mtcars$mpg[is.na(mtcars$mpg)] <- mean(mtcars$mpg) # this would replace any na values with the mean. However, in our example, there are no NAs so there is no need to replace anything.
+```
+

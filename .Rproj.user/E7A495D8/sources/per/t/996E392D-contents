@@ -1,0 +1,168 @@
+---
+title: "Section 13: Advanced R Programming"
+output: html_notebook
+---
+
+## sequencing
+```{r}
+vec <- c(3, 5, 3, 2, 5)
+seqvec <- seq(vec)
+seqvec
+```
+## sorting
+```{r}
+# sort numbers
+cv <- c(5,55,43,5,7,7,2,4,6)
+sort(cv)
+
+
+# sort numbers descending
+sort(cv, decreasing=T)
+
+# sort characters
+cha <- c('d', 'a', 'c', 'b')
+sort(cha)
+
+# sort characters with upper and lower case (note that lower case goes first)
+cHa <- c('d', 'b', 'a', 'B', 'c')
+sort(cHa)
+
+```
+## reverse the order
+```{r}
+rev(cv)
+```
+
+## append()
+To add two objects together
+```{r}
+cv2 <- c(1:10)
+append(cv, cv2)
+char <- "Hiya"
+numb <- 4
+append(numb, char)
+```
+
+## check an object's datatype
+```{r}
+is.array(cv2) # expect FALSE
+is.vector(cv2) # expect TRUE
+```
+
+## convert an object to a new datatype
+```{r}
+as.character(cv2)
+```
+
+## select random numbers
+```{r}
+library(stringr)
+blob <- sample(1:100, 1)
+str_glue("blob: {blob}")
+
+multiBlob <- sample(1:100, 5)
+multiBlob
+
+```
+
+## select random letters
+```{r}
+sample(letters, 3)
+sample(LETTERS,2)
+```
+
+## apply
+```{r}
+v <- c(1:5)
+
+addrand <- function(x) {
+  ran <- sample(1:100,1)
+  return(x+ran)
+}
+#addrand(10)
+
+# apply the addrand function to every item in the vector. returns a list
+lapply(v,addrand)
+
+# returns a vector
+sapply(v,addrand)
+
+```
+
+## anonymous functions
+Purpose: to save space and time
+Use case: when you only use a function once
+structure: `function(param){body}`
+Note: you don't need `return`
+```{r}
+# create a vector of numbers
+v <- 1:5
+
+# use sapply, passing the vector and an anonymous function as arguments
+sapply(v,function(num){num*2})
+
+
+```
+
+## using default arguments
+```{r}
+times_three <- function(num=1) {
+  return(num * 3)
+}
+times_three()
+times_three(15)
+```
+
+## create alphabet of upper and lower case
+```{r}
+alpha <- append(letters, LETTERS)
+sort(alpha)
+```
+
+## math functions
+```{r}
+numero <- 1.2345246
+round(numero, 2) # is the same as...
+round(numero, digits=2) 
+```
+
+## regular expressions
+`grepl` - returns logical
+`grep` - returns index
+General Regular Expression
+```{r}
+text <- "Hi there, do you know who you are voting for?"
+grepl("voting", text) # should return TRUE
+grepl("pig", text) # should return FALSE
+grepl("do you", text) # should return TRUE
+
+v <- c("a", "b", "c", "d")
+grepl('b', v) # will return vector of TRUE and FALSE
+
+grep('b', v) # will return the index of 'b' - 2
+``` 
+
+# date and timestamp
+```{r}
+Sys.Date()
+today <- Sys.Date()
+class(today)
+
+myDate <- "2020-03-02"
+class(myDate)
+myDate <- as.Date(myDate)
+class(myDate)
+
+# create a date in character form, not using normal R date structure
+birthDate <- "Aug-03-76"
+birthDate <- as.Date(birthDate, format = "%b-%d-%y")
+birthDate
+
+as.POSIXct("11:02:03",format="%H:%M:%S")
+
+#help(strptime)
+
+strptime("11:02:03",format = "%H:%M:%S")
+```
+
+

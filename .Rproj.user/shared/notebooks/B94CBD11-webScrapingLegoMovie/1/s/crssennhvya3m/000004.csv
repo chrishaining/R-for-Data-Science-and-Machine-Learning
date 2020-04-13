@@ -1,0 +1,5 @@
+"0","library(rvest)"
+"2","Loading required package: xml2
+"
+"0","lego_movie <- read_html(""http://www.imdb.com/title/tt1490017/"")"
+"0"," "

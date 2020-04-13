@@ -1,0 +1,3 @@
+"0","df <- flights"
+"0","result <- df %>% filter(dep_time>530) %>% sample_n(size=5) %>% arrange(desc(year))"
+"0","result"

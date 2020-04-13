@@ -1,0 +1,2 @@
+"0","# select all the data that meets two conditions"
+"0","mtcars[mtcars$wow>22 & mtcars$hp > 100,]"

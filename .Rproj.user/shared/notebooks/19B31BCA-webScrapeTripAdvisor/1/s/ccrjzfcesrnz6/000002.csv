@@ -1,0 +1,1 @@
+"0","data.frame(id, quote, rating, date, review, stringsAsFactors = FALSE) %>% View()"

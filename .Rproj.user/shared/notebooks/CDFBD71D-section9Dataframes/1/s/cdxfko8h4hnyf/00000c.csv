@@ -1,0 +1,2 @@
+"0","# display a subset of df"
+"0","subset(df, subset = rain==T)"

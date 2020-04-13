@@ -1,0 +1,6 @@
+"0","Age <- c(22,25,26)"
+"0","Weight <- c(150,165,120)"
+"0","Sex <- c(""M"",""M"",""F"")"
+"0","Name <- c(""Sam"",""Frank"",""Amy"")"
+"0","people <- data.frame(Name, Age,Weight,Sex)"
+"0","people"

@@ -1,0 +1,7 @@
+"0","sample <- subset(df, hp>100 & wt>2.5,)"
+"0","mean <- mean(sample$wow)"
+"0","mean"
+"1","[1]"
+"1"," 16.86364"
+"1","
+"

@@ -1,0 +1,4 @@
+"0","write.csv(cars, ""my_cars.csv"")"
+"0",""
+"0","my_cars <- read.csv('my_cars.csv')"
+"0","my_cars"

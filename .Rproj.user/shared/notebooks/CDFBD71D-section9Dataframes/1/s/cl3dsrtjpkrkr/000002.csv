@@ -1,0 +1,2 @@
+"0","# select all the data that meets a certain condition"
+"0","mtcars[mtcars$wow > 22,]"

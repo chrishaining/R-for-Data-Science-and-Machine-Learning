@@ -1,0 +1,4 @@
+"0","entireWorkbook <- lapply(excel_sheets('Data Input and Output with R/Sample-Sales-Data.xlsx'),read_excel,path=""Data Input and Output with R/Sample-Sales-Data.xlsx"")"
+"0","entireWorkbook"
+"1","[[1]]
+"

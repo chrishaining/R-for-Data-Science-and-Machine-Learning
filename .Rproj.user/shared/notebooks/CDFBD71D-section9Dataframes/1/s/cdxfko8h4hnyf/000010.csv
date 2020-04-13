@@ -1,0 +1,4 @@
+"0",""
+"0","# order the data by temperature, descending order"
+"0","neg <- order(-df['temperature'])"
+"0","df[neg,]"

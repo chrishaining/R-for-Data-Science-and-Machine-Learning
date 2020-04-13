@@ -1,0 +1,1 @@
+"0","carsData %>% filter(cyl==6) %>% summarise(mean(hp))"

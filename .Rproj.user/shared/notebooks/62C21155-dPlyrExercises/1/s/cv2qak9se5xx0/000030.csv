@@ -1,0 +1,2 @@
+"0","res <- carsData %>% filter(mpg>20,cyl==6)"
+"0","res"

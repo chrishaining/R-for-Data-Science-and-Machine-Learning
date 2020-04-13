@@ -1,0 +1,2 @@
+"0","# alternative way to select data based on conditions"
+"0","subset(mtcars, wow>22 & hp>100)"

@@ -1,0 +1,59 @@
+---
+title: ""
+output: html_notebook
+---
+
+
+## reading and writing csv files
+CSV stands for Comma Separated Variable
+```{r}
+write.csv(cars, "my_cars.csv")
+
+my_cars <- read.csv('my_cars.csv')
+my_cars
+names <- c("Mazda", "Porsche", "Lada", "Ferrari", "Ford", "MG", "Jaguar", "Volvo", "VW", "Fiat")
+#my_cars$X <- names
+#my_cars
+```
+
+## excel files
+```{r}
+library(readxl)
+excel_sheets('Data Input and Output with R/Sample-Sales-Data.xlsx')
+df <- read_excel('Data Input and Output with R/Sample-Sales-Data.xlsx',sheet = "Sheet1") # with a single sheet file, it's not necessary to specify the sheet
+head(df)
+```
+
+
+```{r}
+entireWorkbook <- lapply(excel_sheets('Data Input and Output with R/Sample-Sales-Data.xlsx'),read_excel,path="Data Input and Output with R/Sample-Sales-Data.xlsx")
+entireWorkbook
+```
+
+## write an excel file
+```{r}
+library(xlsx)
+write.xlsx(cars, 'cars.xlsx')
+
+```
+
+```{r}
+excel_sheets('cars.xlsx')
+broom <- read_excel('cars.xlsx')
+broom  
+```
+
+
+## SQL
+```{r}
+library(RODBC)
+```
+
+## web scraping
+```{r}
+library(rvest)
+demo(package = 'rvest')
+demo(package = 'rvest', topic = 'tripadvisor')
+
+```
+

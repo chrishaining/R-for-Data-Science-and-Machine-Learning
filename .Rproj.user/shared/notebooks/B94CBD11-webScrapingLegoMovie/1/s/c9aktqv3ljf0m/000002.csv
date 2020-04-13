@@ -1,0 +1,5 @@
+"0","lego_movie %>%"
+"0","  html_nodes(""#titleCast .itemprop span"") %>%"
+"0","  html_text()"
+"1","character(0)
+"

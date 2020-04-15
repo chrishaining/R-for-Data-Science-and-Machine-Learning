@@ -1,0 +1,19 @@
+---
+title: "Plotly with ggplot2 and R"
+output: html_notebook
+---
+
+It's really easy to use __plotly__ with __ggplot2__:
+1. Install the __plotly__ package using __RStudio__
+2. Import the package: `library(plotly)`
+3. call the `ggplotly` function, using an existing `ggplot` object as an argument, e.g. `gpl <- ggplotly(pl)`, where `pl` is an existing `ggplot` object.
+```{r}
+library(ggplot2)
+library(plotly)
+
+pl <- ggplot(mtcars, aes(mpg,wt)) + geom_point()
+
+gpl <- ggplotly(pl)
+gpl
+```
+

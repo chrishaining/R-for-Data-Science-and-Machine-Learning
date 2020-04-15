@@ -87,7 +87,7 @@ pl2 + geom_text(aes(label=Country))
 ```{r}
 pointsToLabel <- c("Russia", "Venezuela", "Iraq", "Myanmar", "Sudan", "Afghanistan", "Congo", "Greece", "Argentina", "Brazil", "India", "Italy", "China", "South Africa", "Spain", "Botswana", "Cape Verde", "Bhutan", "Rwanda", "France", "United States", "Germany", "Britain", "Barbados", "Norway", "Japan", "New Zealand", "Singapore")
 
-pl3 <- pl2 + geom_text(aes(label = Country), color = "gray20", 
+pl3 <- pl2 + geom_text(aes(label = Country), color = "gray20", fontface='bold',
                 data = subset(df, Country %in% pointsToLabel),check_overlap = TRUE)
 
 pl3
@@ -124,6 +124,26 @@ pl4
 ```
 
 ## Results
-A look at the graph shows a fairly clear positive correlation between HDI and CPI. Therefore, it looks like we can reject the null hypothesis.
+A look at the graph shows a fairly clear positive correlation between HDI and CPI. I would estimate that it's somewhere between 0.5 and 1. Therefore, it looks like we can reject the null hypothesis.
 
 Hang on! What about significance? Is it possible the positive correlation could be due to chance, and that the difference is not statistically significant?
+
+```{r}
+
+# calculate the correlation coefficient (because I haven't specified a method, this will use the default Pearson Correlation Coefficient)
+correlationCoefficient <- cor(df$HDI, df$CPI)
+library(stringr)
+str_glue("Correlation Coefficient: {correlationCoefficient}")
+```
+## Use the cor.test() function to test the hypothesis. This will find the p-value.
+```{r}
+correlationTest <- cor.test(df$HDI, df$CPI)
+# class(correlationTest)
+correlationTest
+p_value <- format(2.2e-16, scientific = FALSE)
+str_glue("P-value: {p_value}")
+```
+
+Conclusion: we can see that the p-value is 0.00000000000000022, which is less than 0.05 (5%), which is the significance level I am using. The p-value is the probability that we would have found the current result if the correlation coefficient was zero. That is, there would be a 5% possibility of getting these results, by chance alone. Because the p-value is less than 0.05, we can reject that possibility. Therefore, we can reject the null hypothesis. 
+
+

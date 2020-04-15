@@ -120,7 +120,10 @@ pl4
 ## Finally use ggtitle() to add a string as a title.
 ```{r}
 pl4 <- pl4 + ggtitle('Corruption and Human Development') + theme_economist()
-pl4
+
+library(plotly)
+gpl4 <- ggplotly(pl4)
+gpl4
 ```
 
 ## Results
@@ -145,5 +148,6 @@ str_glue("P-value: {p_value}")
 ```
 
 Conclusion: we can see that the p-value is 0.00000000000000022, which is less than 0.05 (5%), which is the significance level I am using. The p-value is the probability that we would have found the current result if the correlation coefficient was zero. That is, there would be a 5% possibility of getting these results, by chance alone. Because the p-value is less than 0.05, we can reject that possibility. Therefore, we can reject the null hypothesis. 
+
 
 

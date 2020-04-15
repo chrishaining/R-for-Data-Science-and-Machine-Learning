@@ -118,12 +118,15 @@ pl4
 ```
 
 ## Finally use ggtitle() to add a string as a title.
-```{r}
+Note the use of `fig.width` and `fig.height` to make the graph appear larger in the notebook, plus `ggsave` to create a .png file of the graph.
+```{r, fig.width= 9.5, fig.height=6}
+
 pl4 <- pl4 + ggtitle('Corruption and Human Development') + theme_economist()
 
 library(plotly)
 gpl4 <- ggplotly(pl4)
 gpl4
+ggsave('gpl4.png', height = 7 , width = 10)
 ```
 
 ## Results

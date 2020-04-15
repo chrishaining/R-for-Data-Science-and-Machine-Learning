@@ -3,9 +3,127 @@ title: "Data Visualization Project"
 output: html_notebook
 ---
  
+This is the Data Visualization Project from the Udemy course [Data Science and Machine Learning Bootcamp](https://www.udemy.com/course/data-science-and-machine-learning-bootcamp-with-r/learn/lecture/5397722#content), taught by Jose Portilla.
+
+The source of the data is the [Economist](https://www.economist.com/graphic-detail/2011/12/02/corrosive-corruption).
+
+I am not following exactly the requirements set out by the course. The reason is that, in addition to the data visualization aspects of the project, I also want to practise using hypothesis testing.
+
+## Key Points
+* HDI is the Human Development Index, created by the United Nations. The HDI "is a summary measure of average achievement in key dimensions of human development: a long and healthy life, being knowledgeable and have a decent standard of living".[United Nations Development Programme, Human Development Reports](http://hdr.undp.org/en/content/human-development-index-hdi). The HDI is measured on a scale of 0-1, with 0 being the lowest score (i.e. people in that country have a very low quality of life) and 1 (i.e. people have a very low quality of life).
+* CPI is the Corruption Perceptions Index, developed by Transparency International. The CPI "ranks 180 countries and territories by their perceived levels of public sector corruption, according to experts and business people."[Transparency International](https://www.transparency.org/cpi2019). CPI is measured on a scale of 0-100, with 0 being very corrupt and 100 being very clean.
+
+## Hypothesis
+My starting hypothesis is that HDI is positively correlated with CPI. That is:
+* a country with a low HDI will have a low CPI
+* a country with a medium HDI will have a medium CPI 
+* a country with a high HDI will have a high CPI.
+  _H1 = correlation(HDI,CPI) > 0_
+
+This means that the null hypothesis can be stated as:
+
+HDI is negatively correlated with CPI, or there is no correlation
+  _H0 = correlation(HDI,CPI) <= 0_
+
+So, the purposes of my project are:
+1. To test whether the null hypothesis can be rejected
+2. To visualize the data using `ggplot2` 
+
+## Import the ggplot2 data.table libraries and use fread to load the csv file 'Economist_Assignment_Data.csv' into a dataframe called df (Hint: use drop=1 to skip the first column)
 
 ```{r}
+library(ggplot2)
+library(ggthemes)
+library(readr)
+library(dplyr)
+df <- read.csv('./Training Exercises/Capstone and Data Viz Projects/Data Visualization Project/Economist_Assignment_Data.csv')
+str(df)
+colnames(df)
  
+nrow(df)
+
+## Check the head of df
+head(df)
 ```
 
+ ## Use ggplot() + geom_point() to create a scatter plot object called pl. You will need to specify x=CPI and y=HDI and color=Region as aesthetics
+```{r}
+#pl <- ggplot(df, aes(x=CPI,y=HDI)) + geom_point(aes(color=Region))
+
+## Change the points to be larger empty circles. (You'll have to go back and add arguments to geom_point() and reassign it to pl.) You'll need to figure out what shape= and size=
+pl <- ggplot(df, aes(x=CPI,y=HDI)) + geom_point(aes(color=Region), shape = 1, size=3 )
+
+
+pl
+```
  
+## Add geom_smooth(aes(group=1)) to add a trend line
+```{r}
+pl + geom_smooth(aes(group=1))
+```
+
+## We want to further edit this trend line. Add the following arguments to geom_smooth (outside of aes):
+
+method = 'lm'
+formula = y ~ log(x)
+se = FALSE
+color = 'red'
+For more info on these arguments, check out the documentation under the Arguments list for details.
+
+Assign all of this to pl2
+```{r}
+pl2 <- pl + geom_smooth(aes(group=1), method = 'lm', formula = y ~ log(x), se=FALSE, color='red')
+
+pl2
+```
+
+## It's really starting to look similar! But we still need to add labels, we can use geom_text! Add geom_text(aes(label=Country)) to pl2 and see what happens. (Hint: It should be way too many labels)
+```{r}
+pl2 + geom_text(aes(label=Country))
+
+```
+
+## Labeling a subset is actually pretty tricky! So we're just going to give you the answer since it would require manually selecting the subset of countries we want to label!
+```{r}
+pointsToLabel <- c("Russia", "Venezuela", "Iraq", "Myanmar", "Sudan", "Afghanistan", "Congo", "Greece", "Argentina", "Brazil", "India", "Italy", "China", "South Africa", "Spain", "Botswana", "Cape Verde", "Bhutan", "Rwanda", "France", "United States", "Germany", "Britain", "Barbados", "Norway", "Japan", "New Zealand", "Singapore")
+
+pl3 <- pl2 + geom_text(aes(label = Country), color = "gray20", 
+                data = subset(df, Country %in% pointsToLabel),check_overlap = TRUE)
+
+pl3
+```
+
+## Almost there! Still not perfect, but good enough for this assignment. Later on we'll see why interactive plots are better for labeling. Now let's just add some labels and a theme, set the x and y scales and we're done!
+
+Add theme_bw() to your plot and save this to pl4
+```{r}
+pl4 <- pl3 + theme_bw()
+pl4
+```
+
+## Add scale_x_continuous() and set the following arguments:
+
+name = Same x axis as the Economist Plot
+limits = Pass a vector of appropriate x limits
+breaks = 1:10
+```{r}
+pl4 <- pl4 + scale_x_continuous(name='Corruption Perceptions Index, 2011(10=least corrupt)', limits = c(0.9,10.5), breaks = 1:10)
+pl4
+```
+
+## Now use scale_y_continuous to do similar operations to the y axis!
+```{r}
+pl4 <- pl4 + scale_y_continuous(name='Human Development Index, 2011 (1=Best)', limits = c(0.2,1.0))
+pl4
+```
+
+## Finally use ggtitle() to add a string as a title.
+```{r}
+pl4 <- pl4 + ggtitle('Corruption and Human Development') + theme_economist()
+pl4
+```
+
+## Results
+A look at the graph shows a fairly clear positive correlation between HDI and CPI. Therefore, it looks like we can reject the null hypothesis.
+
+Hang on! What about significance? Is it possible the positive correlation could be due to chance, and that the difference is not statistically significant?

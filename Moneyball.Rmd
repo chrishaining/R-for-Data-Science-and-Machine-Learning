@@ -246,5 +246,7 @@ str_glue("The mean OBP score is {meanOBP}")
 str_glue("The total salary is {totalSalary}")
 ```
 
-## Conclusion
-My solution meets the requirements of the task. There are many other possible combinations of players that would fit the bill. I chose mine because I started with the goal of maximising the AB score. However, whether that is the best measure is debatable. Had I used low salary or high mean OBP as the primary goal, I would have chosen a different approach. 
+## Conclusion and Learning Points
+My solution meets the requirements of the task. There are many other possible combinations of players that would fit the bill. I chose mine because I started with the goal of maximising the AB score. However, whether that is the best measure is debatable. Had I used low salary or high mean OBP as the primary goal, I would have chosen a different approach. I don't know much about baseball, so I'm not sure which measure would be best. Given that the title is __Moneyball__, it's probably the low salary!
+
+In terms of how I would approach this differently in future, I would plot my interim results in order to compare multiple variables. For example, a scatterplot of salary and AB might show that there is no reason to pay salaries as high as the ones I chose.

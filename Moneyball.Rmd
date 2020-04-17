@@ -1,0 +1,250 @@
+---
+title: "Moneyball project"
+output: html_notebook
+---
+
+
+## 1. Import and inspect the data
+```{r}
+ 
+library(readr)
+library(dplyr)
+batting <- read.csv('Training Exercises/Capstone and Data Viz Projects/Capstone Project/Batting.csv')
+
+nrow(batting)
+str(batting)
+colnames(batting)
+head(batting)
+
+```
+
+```{r}
+head(batting$AB, 5)
+```
+
+```{r}
+head(batting$X2B)
+```
+
+## Create Batting Average
+Batting Average = Hits / At Bats
+
+[Wikipedia](https://en.wikipedia.org/wiki/Batting_average)
+
+```{r}
+batting <- batting %>% mutate(BA=H/AB)
+tail(batting$BA, 5)
+```
+
+##  Create On Base Percentage
+
+
+OBP= H+BB+HBP / AB+BB+HBP+SF
+
+H = Hits
+BB = Bases on Balls (Walks)
+HBP = Hit By Pitch
+AB = At bat
+SF = Sacrifice fly
+
+[Wikipedia](https://en.wikipedia.org/wiki/On-base_percentage)
+
+[1] "playerID"  "yearID"    "stint"     "teamID"    "lgID"      "G"         "G_batting" "AB"       
+ [9] "R"         "H"         "X2B"       "X3B"       "HR"        "RBI"       "SB"        "CS"       
+[17] "BB"        "SO"        "IBB"       "HBP"       "SH"        "SF"        "GIDP"      "G_old"    
+```{r}
+batting <- batting %>% mutate(OBP=(H+BB+HBP)/(AB+BB+HBP+SF))
+tail(batting$OBP,5)
+
+```
+
+
+
+## Create Slugging Percentage
+
+SLG = (1B) + (2 * X2B) + (3 * X3B) + (4 * HR)  / AB
+
+
+Slugging Percentage (SLG). Hint: For SLG, you need 1B (Singles), this isn't in your data frame. However you can calculate it by subtracting doubles,triples, and home runs from total hits (H): 1B = H-2B-3B-HR
+
+[Wikipedia](https://en.wikipedia.org/wiki/Slugging_percentage)
+
+```{r}
+# calculate 1B
+
+batting <- batting %>% mutate(SLG=((H-X2B-X3B-HR)+(2*X2B)+(3*X3B)+(4 * HR)/AB))
+tail(batting$SLG,5)
+
+```
+
+## check the new structure
+```{r}
+str(batting)
+```
+
+## load salaries
+```{r}
+sal <- read.csv('Training Exercises/Capstone and Data Viz Projects/Capstone Project/Salaries.csv')
+head(sal)
+```
+
+## check structure
+```{r}
+str(sal)
+summary(sal)
+```
+
+Now it is time to merge the batting data with the salary data! Since we have players playing multiple years, we'll have repetitions of playerIDs for multiple years, meaning we want to merge on both players and years.
+
+Use the merge() function to merge the batting and sal data frames by c('playerID','yearID'). Call the new data frame combo
+
+```{r}
+combo <- merge(batting, sal, by = c('playerID','yearID'))
+head(combo)
+```
+
+## summary of the combo data
+```{r}
+summary(combo)
+```
+
+## Find the Lost Players
+As previously mentioned, the Oakland A's lost 3 key players during the off-season. We'll want to get their stats to see what we have to replace. The players lost were: first baseman 2000 AL MVP Jason Giambi (giambja01) to the New York Yankees, outfielder Johnny Damon (damonjo01) to the Boston Red Sox and infielder Rainer Gustavo "Ray" Olmedo ('saenzol01').
+
+Use the subset() function to get a data frame called lost_players from the combo data frame consisting of those 3 players. Hint: Try to figure out how to use %in% to avoid a bunch of or statements!
+```{r}
+lost_IDs <- c('giambja01', 'damonjo01', 'saenzol01')
+lost_players <- subset(combo, playerID %in% lost_IDs)
+lost_players
+```
+
+Since all these players were lost in after 2001 in the offseason, let's only concern ourselves with the data from 2001.
+
+Use subset again to only grab the rows where the yearID was 2001.
+```{r}
+lost_players <- subset(lost_players, yearID==2001)
+lost_players
+```
+
+Reduce the lost_players data frame to the following columns: playerID,H,X2B,X3B,HR,OBP,SLG,BA,AB
+```{r}
+lost_players <- lost_players %>% select(playerID,H,X2B,X3B,HR,OBP,SLG,BA,AB)
+lost_players
+```
+
+## Replacement Players
+Now we have all the information we need! Here is your final task - Find Replacement Players for the key three players we lost! However, you have three constraints:
+
+The total combined salary of the three players can not exceed 15 million dollars.
+Their combined number of At Bats (AB) needs to be equal to or greater than the lost players.
+Their mean OBP had to equal to or greater than the mean OBP of the lost players
+Use the combo dataframe you previously created as the source of information! Remember to just use the 2001 subset of that dataframe. There's lost of different ways you can do this, so be creative! It should be relatively simple to find 3 players that satisfy the requirements, note that there are many correct combinations available!
+
+
+```{r}
+# Okay, let's get a subset for 2001, and see what the salaries are
+combo2001 <- subset(combo, yearID==2001)
+head(combo2001)
+
+
+```
+
+
+```{r}
+# let's inspect the data to get an idea of the max and min salaries, AB and OBP
+summary(combo2001)
+
+# min salary is 200000
+# since the total salary cap is 15 million, and the lowest salary is 200K, the maximum salary of any one replacement player must be 14.6 million or less (that is, one player could get 14.6 million and the other 2 players each get 200K, adding to 15 million)
+
+# combined AB must be greater than (644+520+305)
+minCombinedAB <- 644+520+305
+minCombinedAB #1649
+# min AB is 0.0
+# max AB is 692.0
+# Since the maximum is 692, we can work out the minimum required. Let's say two of the replacements have a score of 692. That's a combined 1384. 1649-1384=265. 
+
+# mean of combined OBP must be greater than 0.3235294+0.4769001+0.2911765
+minCombinedOBP <- (0.3235294+0.4769001+0.2911765)/3
+minCombinedOBP # 0.3638687
+# min OBP is 0.000
+# max OBP is 1.000
+# It's possible that two of the players have an OBP of 1.0000, which means that the minimum would be 0.0000. Hence, there's no point in putting any filters on for this.
+```
+
+
+
+```{r}
+# let's create a new subset with our information about salary and AB requirements
+combo2001 <- subset(combo2001, salary <= 14600000)
+
+
+
+```
+
+
+```{r}
+head(combo2001)
+```
+
+```{r}
+combo2001 <- subset(combo2001, AB >= 265)
+nrow(combo2001) # we've narrowed our search to 251 players. The next step is to pick one of the variables and get the best score for that variable. Let's pick AB.
+
+```
+
+```{r}
+# does our summary tell us anything useful about AB?
+summary(combo2001$AB) # not sure
+#let's look at a sorted list:
+sort(combo2001$AB) # this is useful, as it shows the second highest value,672. If we chose 692+672 (1364), which would mean the other player must have at least 285 (1649-1364). So we can eliminate any AB below that
+```
+
+```{r}
+combo2001 <- subset(combo2001, AB >= 285)
+nrow(combo2001) # we now have 242 players
+
+```
+
+```{r}
+# it would be useful to take a look at salaries again. 
+combo2001 %>% select(playerID, AB, OBP, salary) %>% arrange(desc(AB))
+# this shows that the top three players by AB would cost a combined
+costABTop <- 5666667 + 4500000 + 200000
+costABTop # 10,366,667 - well under 15 million, so let's see what the OBP would be
+
+opbABTop <- (0.3814714	+ 0.3139205 + 0.3234880)/3
+opbABTop # 0.3396266 - this is less than the requirement of 0.3638687, so we need to raise this. We have some leeway, as the top 10 players by AB all have scores that would mean the combined AB was sufficient.
+#replace the lowest OBP 
+opbABTop2 <- (0.3814714	+ 0.3710602 + 0.3688047)/3 # this results in a mean of 0.3737788
+opbABTop2 # suzukic01 + stewash01 + aurilri01
+#AB = 692 + 640 + 636 = 1968, so that meets the requirement
+#combined salary 5666667 + 2183333 + 3250000 = 11,100,000 - so this meets the requirement
+
+```
+
+
+```{r}
+ids <- c('suzukic01','stewash01','aurilri01')
+replacements <- subset(combo2001, playerID %in% ids)
+replacements
+
+
+
+
+
+```
+```{r}
+library(stringr)
+totalAB <- replacements %>% summarise(sum(AB))
+meanOBP <- replacements %>% summarise(mean(OBP))
+totalSalary <- replacements %>% summarise(sum(salary))
+str_glue("The total AB score is {totalAB}")
+
+str_glue("The mean OBP score is {meanOBP}")
+
+str_glue("The total salary is {totalSalary}")
+```
+
+## Conclusion
+My solution meets the requirements of the task. There are many other possible combinations of players that would fit the bill. I chose mine because I started with the goal of maximising the AB score. However, whether that is the best measure is debatable. Had I used low salary or high mean OBP as the primary goal, I would have chosen a different approach. 

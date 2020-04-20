@@ -1,0 +1,153 @@
+---
+title: "Machine Learning: Linear Regression"
+output: html_notebook
+---
+Section 20 of the course
+
+
+# 1. Import and explore the data
+
+
+## import and inspect data
+```{r}
+library(readr)
+
+df <- read.csv('Machine Learning with R/student-mat.csv', sep = ';')
+head(df)
+summary(df)
+```
+
+## check if there are any NA values
+```{r}
+any(is.na(df))
+```
+
+## get correlations of the numeric variables
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(dplyr)
+
+numCols <- sapply(df,is.numeric)
+
+corData <- cor(df[numCols])
+corData
+```
+## import some packages for plotting correlations
+```{r}
+library(corrgram)
+library(corrplot)
+
+# corrplot requires numeric data
+corrplot(corData,method='color')
+
+```
+
+```{r}
+# corrgram is similar to corrplot, but you can use the original data without filtering for numeric values only.
+corrgram(df,order=T,lower.panel = panel.pie, upper.panel = panel.shade, text.panel = panel.txt)
+```
+
+```{r}
+# looking at a histogram 
+ggplot(df,aes(x=G3)) + geom_histogram(bins=20,alpha=0.5,fill='blue')
+```
+
+# 2. Split the data into training and testing data
+
+## install caTools package
+```{r}
+library(caTools)
+
+# set a seeds file of random data
+set.seed(101)
+
+# state the way you are splitting the data for the sample. arguments are a dataframe column and splitRatio (the proportion of the data you want to use for the sample)
+sample <- sample.split(df$G3,SplitRatio = 0.7)
+
+# create the training subset (i.e. here it's 0.7 of the data)
+train <- subset(df, sample == TRUE)
+
+# which means the test subset should be 0.3
+test <- subset(df,sample==FALSE)
+```
+
+## create the training model
+```{r}
+
+# for a linear regression model
+# y is the thing you want to learn/predict, x1 x2 of data are the things that will help the model predict
+#model <- lm(y ~ x1 + x2,data)
+
+# quicker way for a linear regression model
+#model <- lm(y ~ . , data)
+
+model <- lm(G3 ~ ., data = train)
+```
+
+## run the model
+```{r}
+summary(model)
+```
+R-squared - the higher the score, the better the fit to the model (1 is maximum)
+
+
+## plot the residuals
+The residuals show the difference between reality and your model (so, the smaller the residual values, the more accurate your model)
+Ideally, we want to see a normal distribution. Something unusual (e.g. binomial distribution) might indicate that a linear regression model is a bad strategy.
+
+```{r}
+res <- residuals(model)
+class(res)
+res <- as.data.frame(res)
+
+ggplot(res,aes(res)) + geom_histogram(fill='blue', alpha=0.5)
+```
+Note that there are negative `res` values. This doesn't make sense, as the lowest result possible is 0 (it's a test). However, there is a way to get round this. 
+
+```{r}
+plot(model)
+```
+
+# 3. Test the predictions
+
+```{r}
+G3Predictions <- predict(model, test)
+results <- cbind(G3Predictions, test$G3)
+colnames(results) <- c('pred','real')
+results <- as.data.frame(results)
+head(results)
+min(results)
+```
+
+## deal with those strange negative predictions
+since the minimum score on a test is zero, transform any negative values into zero.
+```{r}
+toZero <- function(x) {
+  if (x <0) {return(0)} else {return(x)}
+}
+
+results$pred <- sapply(results$pred,toZero)
+min(results) # we can see that the minimum is now zero, so the function toZero() has worked
+```
+
+## evaluate the prediction values
+```{r}
+# 1. use Mean Standard Error
+mse <- mean((results$real-results$pred)^2)
+mse
+```
+
+```{r}
+# 2. Root Mean Squared Error
+mse^0.5
+```
+
+```{r}
+# 3. R-squared value
+SSE <- sum((results$pred-results$real)^2)
+SST <- sum((mean(df$G3)-results$real)^2)
+R2 <- 1- SSE/SST
+R2
+```
+This score suggests that the model is quite a good fit (score is almost 0.8, whilst perfection would be 1)

@@ -1,0 +1,164 @@
+---
+title: "Linear Progression Project"
+output: html_notebook
+---
+
+
+ 
+## import libraries and csv
+```{r}
+library(readr)
+library(ggplot2)
+library(plotly)
+library(ggthemes)
+library(dplyr)
+
+bike <- read.csv('Training Exercises/Machine Learning Projects/CSV files for ML Projects/bikeshare.csv')
+head(bike)
+tail(bike)
+summary(bike)
+
+numBike <- sapply(bike,is.numeric)
+cor(bike[numBike])
+
+```
+
+## Can you figure out what is the target we are trying to predict? 
+The target would be the count variable. That is, the number of bicycles used. This would be useful for the people who run a bike rental scheme - they would want to know what the demand is for their product at different times, in different places, so they can purchase the right number of bicycles.
+
+ 
+## Exploratory Data Analysis
+Create a scatter plot of count vs temp. Set a good alpha value.
+```{r}
+ggplot(bike, aes(x=temp, y=count, color=temp)) + geom_point(alpha=0.4)
+```
+
+
+## Plot count versus datetime as a scatterplot with a color gradient based on temperature. You'll need to convert the datetime column into POSIXct before plotting.
+```{r}
+bike <- bike %>% mutate(datetime=as.POSIXct(datetime))
+#head(bike)
+ggplot(bike, aes(x=datetime, y=count, color=temp)) + geom_point(alpha=0.4)
+```
+
+What is the correlation between temp and count?
+```{r}
+cor(bike$temp, bike$count)
+```
+
+Let's explore the season data. Create a boxplot, with the y axis indicating count and the x axis begin a box for each season.
+```{r}
+ggplot(bike, aes(x=factor(season), y=count)) + geom_boxplot(aes(fill=factor(season)),alpha=0.5) + coord_flip() + theme_classic()
+
+
+
+# use coord_flip to flip the axes
+# carBox <- ggplot(carData,aes(x=factor(cyl),y=mpg)) + geom_boxplot(aes(fill=factor(cyl))) + coord_flip() + theme_linedraw()
+# carBox
+
+```
+
+
+
+## Feature Engineering
+A lot of times you'll need to use domain knowledge and experience to engineer and create new features. Let's go ahead and engineer some new features from the datetime column.
+
+Create an "hour" column that takes the hour from the datetime column. You'll probably need to apply some function to the entire datetime column and reassign it. Hint:
+
+time.stamp <- bike$datetime[4]
+format(time.stamp, "%H")
+
+```{r}
+bike <- bike %>% mutate(hour=format(datetime, "%H"))
+head(bike)
+```
+
+
+## Now create a scatterplot of count versus hour, with color scale based on temp. Only use bike data where workingday==1.
+```{r}
+bike2 <- bike %>% filter(workingday==1)
+
+myColors <- c('red', 'green', 'yellow', 'pink', 'blue')
+
+ggplot(bike2, aes(x=hour, y=count,color=temp)) + geom_point(alpha=0.4, position = position_jitter(w=1,h=0)) + scale_color_gradientn(colors=myColors)
+
+
+
+
+```
+
+Optional Additions:
+
+Use the additional layer: scale_color_gradientn(colors=c('color1',color2,etc..)) where the colors argument is a vector gradient of colors you choose, not just high and low.
+Use position=position_jitter(w=1, h=0) inside of geom_point() and check out what it does.
+
+Now create the same plot for non working days:
+```{r}
+bike3 <- bike %>% filter(workingday==0)
+ggplot(bike3, aes(x=hour, y=count,color=temp)) + geom_point(alpha=0.4, position=position_jitter(w=1,h=0)) + scale_color_gradientn(colors=myColors)
+```
+
+
+Building the Model
+Use lm() to build a model that predicts count based solely on the temp feature, name it temp.model
+```{r}
+tempModel <- lm(count ~ temp, data=bike)
+
+```
+
+
+Get the summary of the temp.model
+```{r}
+summary(tempModel)
+```
+
+## How many bike rentals would we predict if the temperature was 25 degrees Celsius? Calculate this two ways:
+
+Using the values we just got above
+Using the predict() function
+```{r}
+
+myWay <- 6.0462+(25 * 9.1705)
+myWay
+
+temp.test <- data.frame(temp=c(25))
+ 
+highWay <- predict(tempModel, temp.test)
+highWay
+
+```
+
+## Use sapply() and as.numeric to change the hour column to a column of numeric values.
+```{r}
+
+bike$hour <- sapply(bike$hour,as.numeric)
+head(bike)
+```
+
+
+## Finally build a model that attempts to predict count based off of the following features. Figure out if theres a way to not have to pass/write all these variables into the lm() function. Hint: StackOverflow or Google may be quicker than the documentation.
+
+season
+holiday
+workingday
+weather
+temp
+humidity
+windspeed
+hour (factor)
+
+```{r}
+model <- lm(count ~ . -casual - registered -datetime -atemp,bike )
+```
+
+Get the summary of the model
+```{r}
+summary(model)
+```
+
+
+
+
+
+
+

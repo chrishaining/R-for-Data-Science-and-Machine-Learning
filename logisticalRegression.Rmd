@@ -1,0 +1,189 @@
+---
+title: "Logistical regression"
+output: html_notebook
+---
+
+This notebook uses the __Titanic__ dataset from [Kaggle](https://www.kaggle.com/c/titanic). The dataset contains details about the passengers on the Titanic. The purpose of the code in the notebook is to find out the probability that passengers survived the sinking of the Titanic. The code uses __logistical regression__, as we are dealing with categorical data (survived/didn't survive).
+
+
+## Get the data
+```{r}
+library(readr)
+library(dplyr)
+dfTrain <- read.csv('Machine Learning with R/titanic_train.csv')
+head(dfTrain)
+```
+
+## Exploratory Data Analysis (EDA)
+
+Import the _Amelia_ package, which is used to find missing data.
+```{r}
+# import the Amelia package
+library(Amelia)
+missmap(dfTrain, main="Titanic Training Data - Missings Map", 
+        col=c("yellow", "black"), legend=FALSE)
+```
+the yellow lines are the datapoints that have an NA value. For instance, the 6th datapoint (i.e. row 6 in the dataframe) has age _NA_.
+
+
+## Visualize the data
+```{r}
+library(ggplot2)
+ggplot(dfTrain, aes(Survived)) + geom_bar()
+```
+
+```{r}
+ggplot(dfTrain,aes(Pclass)) + geom_bar(aes(fill=factor(Pclass)),alpha=0.5) + theme_base()
+```
+
+```{r}
+ggplot(dfTrain,aes(Sex)) + geom_bar(aes(fill=factor(Sex)),alpha=0.5) + theme_base()
+```
+
+```{r}
+ggplot(dfTrain,aes(Age)) + geom_histogram(fill='blue',bins=20,alpha=0.5)
+
+```
+
+
+```{r}
+ggplot(dfTrain,aes(SibSp)) + geom_bar(fill='red',alpha=0.5)
+```
+
+```{r}
+ggplot(dfTrain,aes(Fare)) + geom_histogram(fill='green',color='black',alpha=0.5)
+```
+
+## Data Cleaning
+We want to fill in missing age data instead of just dropping the missing age data rows. One way to do this is by filling in the mean age of all the passengers (imputation).
+
+However we can be smarter about this and check the average age by passenger class. For example:
+```{r}
+pl <- ggplot(dfTrain,aes(Pclass,Age)) + geom_boxplot(aes(group=Pclass,fill=factor(Pclass),alpha=0.4)) 
+pl + scale_y_continuous(breaks = seq(min(0), max(80), by = 2))
+```
+We can see from this boxplot that each class of passenger has a different average age (1st class passengers tend to be the oldest, 3rd class passengers the youngest). 
+
+```{r}
+# function to assign an average age based on the passenger's class
+impute_age <- function(age,class){
+    out <- age
+    for (i in 1:length(age)){
+        
+        if (is.na(age[i])){
+
+            if (class[i] == 1){
+                out[i] <- 37
+
+            }else if (class[i] == 2){
+                out[i] <- 29
+
+            }else{
+                out[i] <- 24
+            }
+        }else{
+            out[i]<-age[i]
+        }
+    }
+    return(out)
+}
+```
+
+```{r}
+fixedAges <- impute_age(dfTrain$Age,dfTrain$Pclass)
+dfTrain$Age <- fixedAges
+```
+
+```{r}
+missmap(dfTrain, main="Titanic Training Data - Missings Map", 
+        col=c("yellow", "black"), legend=FALSE)
+```
+There is now no missing age data. I'm not sure about this approach of adding in the average for missing values. It assumes that there is the missing values are evenly distributed, but it could be that the missing values were not evenly distributed. There may be a reason why some values are missing: perhaps these people were all elderly and did not want to give their age. If the missing values were not evenly distributed, we could be providing misleading results. 
+
+My initial approach was to remove the passengers with missing values from any age-based analysis.
+
+## Building a Logistic Regression Model
+Now it is time to build our model! Let's begin by doing a final "clean-up" of our data by removing the features we won't be using and making sure that the features are of the correct data type.
+```{r}
+str(dfTrain)
+```
+
+```{r}
+dfTrain <- select(dfTrain,-PassengerId,-Name,-Ticket,-Cabin)
+```
+
+```{r}
+str(dfTrain)
+```
+
+```{r}
+dfTrain$Survived <- factor(dfTrain$Survived)
+dfTrain$Pclass <- factor(dfTrain$Pclass)
+dfTrain$Parch <- factor(dfTrain$Parch)
+dfTrain$SibSp <- factor(dfTrain$SibSp)
+```
+
+```{r}
+str(dfTrain)
+```
+
+## Train the Model
+Now let's train the model!
+```{r}
+# generalized linear model
+logModel <- glm(formula=Survived ~ . , family = binomial(link='logit'),data = dfTrain)
+```
+
+```{r}
+summary(logModel)
+```
+
+## Predicting using Test Cases
+Let's make a test set out of our training set, retrain on the smaller version of our training set and check it against the test subset.
+
+```{r}
+library(caTools)
+set.seed(101)
+
+split = sample.split(dfTrain$Survived, SplitRatio = 0.70)
+
+finalTrain = subset(dfTrain, split == TRUE)
+finalTest = subset(dfTrain, split == FALSE)
+```
+
+Now let's rerun our model on only our final training set:
+```{r}
+finalLogModel <- glm(formula=Survived ~ . , family = binomial(link='logit'),data = finalTrain)
+```
+
+```{r}
+summary(finalLogModel)
+```
+
+```{r}
+fittedProbabilities <- predict(finalLogModel,newdata=finalTest,type='response')
+```
+
+
+```{r}
+# quick way to do ifelse. arguments are the boolean, the value if true, the value if false
+fittedResults <- ifelse(fittedProbabilities > 0.5,1,0)
+```
+
+```{r}
+misClasificError <- mean(fittedResults != finalTest$Survived)
+print(paste('Accuracy',1-misClasificError))
+```
+The model can make a prediction with almost 80% accuracy. That's pretty good- much better than chance.
+
+
+Show the confusion matrix:
+```{r}
+confusionMatrix <- table(finalTest$Survived, fittedProbabilities > 0.5)
+confusionMatrix
+```
+
+```{r}
+class(confusionMatrix)
+```
+

@@ -1,0 +1,287 @@
+---
+title: "Logistical Regression Project"
+output: html_notebook
+---
+
+In this project we will be working with the UCI adult dataset. We will be attempting to predict if people in the data set belong in a certain class by salary, either making <=50k or >50k per year.
+
+Typically most of your time is spent cleaning data, not running the few lines of code that build your model, this project will try to reflect that by showing different issues that may arise when cleaning data.
+
+## Get the Data
+Read in the adult_sal.csv file and set it to a data frame called adult.
+
+```{r}
+library(readr)
+adult <- read.csv('Training Exercises/Machine Learning Projects/CSV files for ML Projects/adult_sal.csv')
+head(adult)
+```
+
+Drop the repeated index column
+```{r}
+library(dplyr)
+adult <- adult %>% select(-X)
+head(adult)
+```
+
+Check the head,str, and summary of the data now.
+```{r}
+str(adult)
+summary(adult)
+```
+
+Some questions I have after analysing the `str()` and `summary()`:
+* What is `fnlwgt`?
+* What is `education_num`?
+* What are `capital_gain` and `capital_loss`?
+
+## Data Cleaning
+Notice that we have a lot of columns that are cateogrical factors, however a lot of these columns have too many factors than may be necessary. In this data cleaning section we'll try to clean these columns up by reducing the number of factors.
+
+type_employer column
+Use table() to check out the frequency of the type_employer column.
+```{r}
+table(adult$type_employer)
+```
+
+Combine the two smallest groups (`Never-worked` and `Without-pay` into a single group called "Unemployed". 
+```{r}
+#help(sapply)
+unemp <- function(job){
+    job <- as.character(job)
+    if (job=='Never-worked' | job=='Without-pay'){
+        return('Unemployed')
+    }else{
+        return(job)
+    }
+}
+adult$type_employer <- sapply(adult$type_employer,unemp)
+table(adult$type_employer)
+```
+
+What other columns are suitable for combining? Combine State and Local gov jobs into a category called SL-gov and combine self-employed jobs into a category called self-emp.
+```{r}
+gov <- function(job) {
+  job <- as.character(job) 
+  if (job=='Local-gov' | job=='State-gov') {
+    return('SL-gov')
+  }
+  else {return(job)}
+}
+adult$type_employer <- sapply(adult$type_employer,gov)
+table(adult$type_employer)
+```
+
+```{r}
+self <- function(job) {
+  job <- as.character(job) 
+  if (job=='Self-emp-inc' | job=='Self-emp-not-inc') {
+    return('Self-emp')
+  }
+  else {return(job)}
+}
+adult$type_employer <- sapply(adult$type_employer,self)
+table(adult$type_employer)
+```
+
+Marital Column
+Use table() to look at the marital column
+```{r}
+table(adult$marital)
+```
+
+Reduce this to three groups:
+
+Married
+Not-Married
+Never-Married
+```{r}
+marr <- function(marital) {
+  marital <- as.character(marital) 
+  if (marital=='Divorced' | marital=='Separated' | marital=='Widowed') {
+    return('Not-married')
+  }
+  else if (marital=='Never-married') {
+  return('Never-married')
+  }
+  else {return('Married')}
+}
+adult$marital <- sapply(adult$marital,marr)
+table(adult$marital)
+```
+
+Country Column
+Check the country column using table()
+
+```{r}
+table(adult$country)
+```
+
+Group these countries together however you see fit. You have flexibility here because there is no right/wrong way to do this, possibly group by continents. You should be able to reduce the number of groups here significantly though.
+
+```{r}
+# ideas - Europe, North America, South America, etc. I don't actually know which continent each country goes in, but it will be easy to find out.
+
+# first, create vectors of each continent
+europe <- c('England', 'France', 'Holand-Netherlands','Hungary', 'Greece', 'Ireland', 'Italy', 'Poland', 'Scotland', 'Germany', 'Portugal', 'Yugoslavia')
+asia <- c('China', 'Philippines', 'Taiwan', 'Cambodia', 'India', 'Laos', 'Thailand', 'Vietnam', 'Japan')
+americas <- c('Dominican-Republic','Nicaragua', 'Puerto-Rico', 'United-States', 'Columbia', 'Ecuador', 'Guatemala', 'Honduras', 'Trinidad&Tobago', 'Peru', 'Mexico','Jamaica','Haiti','El-Salvador','Cuba', 'Canada')
+ 
+
+
+# second, write a function that iterates through each item in adult$country and checks if it is in one of the vectors. If yes, reassign the value for that item to the name of the continent.
+continent <- function(country) {
+  country <- as.character(country)
+  if (country %in% europe) {
+    return('Europe')
+  }
+  else if (country %in% asia) {
+    return('Asia')
+  }
+  else if (country %in% americas) {
+    return('Americas')
+  }
+  else {return('Other')}
+}
+
+# call the function
+adult$country <- sapply(adult$country,continent)
+
+
+# given that we've just put all the countries into continents, we should change the name of the column
+adult <- adult %>% rename(continent=country)
+table(adult$continent)
+```
+
+Check the str() of adult again. Make sure any of the columns we changed have factor levels with factor()
+```{r}
+str(adult)
+```
+
+We can see that they are still characters, so let's change them to factors
+```{r}
+adult$type_employer <- sapply(adult$type_employer,factor)
+adult$continent <- sapply(adult$continent,factor)
+adult$marital <- sapply(adult$marital,factor)
+```
+
+```{r}
+str(adult)
+```
+
+```{r}
+table(adult$education)
+```
+
+Missing Data
+Notice how we have data that is missing.
+
+Amelia
+Install and load the Amelia package.
+```{r}
+library(Amelia)
+
+adult[adult=='?'] <- NA
+ 
+table(adult$type_employer)
+```
+
+```{r}
+missmap(adult, main='Adult Missing Data', y.at=c(1), y.labels = c(''), col=c('pink', 'black'), legend=F)
+```
+
+Get rid of the missing data
+```{r}
+adult <- na.omit(adult)
+missmap(adult, main='Adult Missing Data', y.at=c(1), y.labels = c(''), col=c('pink', 'black'), legend=F)
+```
+
+
+## Exploratory Data Analysis (EDA)
+
+```{r}
+str(adult)
+```
+
+Use ggplot2 to create a histogram of ages, colored by income.
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+
+ggplot(adult, aes(x=age)) + geom_histogram(aes(fill=income), col='black', binwidth = 1)
+
+```
+
+Plot a histogram of hours worked per week
+
+```{r}
+ggplot(adult, aes(x=hr_per_week)) + geom_histogram(binwidth=5, color='blue', alpha=0.5)
+```
+
+Create a barplot of continent with the fill color defined by income class. Optional: Figure out how rotate the x axis text for readability
+```{r}
+ggplot(adult, aes(x=continent)) + geom_bar(aes(fill=income)) + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+## Building a Model
+Now it's time to build a model to classify people into two groups: Above or Below 50k in Salary.
+
+Logistic Regression
+Refer to the Lecture or ISLR if you are fuzzy on any of this.
+
+Logistic Regression is a type of classification model. In classification models, we attempt to predict the outcome of categorical dependent variables, using one or more independent variables. The independent variables can be either categorical or numerical.
+
+Logistic regression is based on the logistic function, which always takes values between 0 and 1. Replacing the dependent variable of the logistic function with a linear combination of dependent variables we intend to use for regression, we arrive at the formula for logistic regression.
+
+Take a quick look at the head() of adult to make sure we have a good overview before going into building the model!
+```{r}
+head(adult)
+```
+
+Train Test Split
+Split the data into a train and test set using the caTools library as done in previous lectures. Reference previous solutions notebooks if you need a refresher.
+
+
+```{r}
+library(caTools)
+# Set a random see so your "random" results are the same as this notebook
+set.seed(101) 
+
+# Split up the sample, basically randomly assigns a booleans to a new column "sample"
+sample <- sample.split(adult$income, SplitRatio = 0.70) # SplitRatio = percent of sample==TRUE
+
+# Training Data
+train = subset(adult, sample == TRUE)
+
+# Testing Data
+test = subset(adult, sample == FALSE)
+
+```
+
+```{r}
+# generalized linear model
+logModel <- glm(formula=income ~ . , family = binomial(link='logit'),data = train)
+summary(logModel)
+```
+
+We have still a lot of features! Some important, some not so much. R comes with an awesome function called step(). The step() function iteratively tries to remove predictor variables from the model in an attempt to delete variables that do not significantly add to the fit. How does it do this? It uses AIC. Read the wikipedia page for AIC if you want to further understand this, you can also check out help(step). This level of statistics is outside the scope of this project assignment so let's keep moving along
+
+```{r}
+new.model <- step(logModel) 
+summary(new.model)
+```
+
+
+```{r}
+fitted.probabilities <- predict(logModel,newdata=test,type='response')
+
+# fitted.results <- ifelse(fitted.probabilities > 0.5,1,0)
+
+# class.error <- mean(fitted.results != test$income)
+# print(paste('Accuracy',1-class.error))
+
+confusion.matrix <- table(test$income, fitted.probabilities > 0.5)
+confusion.matrix
+```
+

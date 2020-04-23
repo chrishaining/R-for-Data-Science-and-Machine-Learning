@@ -289,9 +289,9 @@ confusion.matrix
 ```
 
 True positives: 6369
-False positives: 551
+False positives: 551 
 True negatives: 1421
-False negatives: 874
+False negatives: 874 
 
 ### Check the __accuracy__ by adding the true positive and true negative, then dividing this by the sum of all the data points
 ```{r}
@@ -307,7 +307,7 @@ Recall is the 'ability of a model to find all the relevant cases within a datase
  
 
 ```{r}
-6369/(6369+874)
+6369/(6369+551)
 ```
 
 
@@ -316,7 +316,7 @@ Recall is the 'ability of a model to find all the relevant cases within a datase
 'Precision is defined as the number of true positives divided by the number of true positives plus the number of false positives'
 
 ```{r}
-6369/(6369+551)
+6369/(6369+874)
 ```
 
 Source of quotes on recall and precision: [towardsdatascience]

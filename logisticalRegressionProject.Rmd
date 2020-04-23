@@ -239,9 +239,8 @@ Take a quick look at the head() of adult to make sure we have a good overview be
 head(adult)
 ```
 
-Train Test Split
-Split the data into a train and test set using the caTools library as done in previous lectures. Reference previous solutions notebooks if you need a refresher.
-
+## Train Test Split
+Split the data into a train and test set using the caTools library as done in previous lectures.  
 
 ```{r}
 library(caTools)
@@ -261,6 +260,10 @@ test = subset(adult, sample == FALSE)
 
 ```{r}
 # generalized linear model
+# the glm function takes the following arguments:
+#   formula=the variable you want to predict ~ the other variables 
+#   family= go for binomial(logit) 
+#   data= your training data
 logModel <- glm(formula=income ~ . , family = binomial(link='logit'),data = train)
 summary(logModel)
 ```
@@ -285,3 +288,36 @@ confusion.matrix <- table(test$income, fitted.probabilities > 0.5)
 confusion.matrix
 ```
 
+True positives: 6369
+False positives: 551
+True negatives: 1421
+False negatives: 874
+
+### Check the __accuracy__ by adding the true positive and true negative, then dividing this by the sum of all the data points
+```{r}
+accuracy <- (6369+1421)/(6369+551+874+1421)
+accuracy
+```
+
+### check the __recall__ by dividing 6369 by (6369+551)
+
+Recall is the 'ability of a model to find all the relevant cases within a dataset' 
+
+'The precise definition of recall is the number of true positives divided by the number of true positives plus the number of false negatives.'
+ 
+
+```{r}
+6369/(6369+874)
+```
+
+
+### Check the __precision__ by dividing 6369 by (6369+874)
+
+'Precision is defined as the number of true positives divided by the number of true positives plus the number of false positives'
+
+```{r}
+6369/(6369+551)
+```
+
+Source of quotes on recall and precision: [towardsdatascience]
+(https://towardsdatascience.com/beyond-accuracy-precision-and-recall-3da06bea9f6c)

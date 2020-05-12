@@ -1,0 +1,115 @@
+---
+title: "K-Nearest Neighbours"
+output: html_notebook
+---
+
+### What are K-Nearest Neighbours?
+This method works on the principle that birds of a feather flock together. That is, objects tend to be clustered near to similar objects.
+
+### Use cases
+* when you want to find out what kind of thing an item is.
+* for classification problems - using categorial data
+
+
+### Some disadvantages/non-use cases
+* If the dataset is very large, the K-Nearest Neighbour method might be too slow
+
+
+## How to use the K-Nearest Neighbours method
+
+### 1. get the data
+
+Use the ISLR libary to get the iris data set. Check the head of the iris Data Frame.
+```{r}
+library(ISLR)
+library(dplyr)
+head(iris)
+summary(iris)
+str(iris)
+any(is.na(iris))
+summary(iris$Species)
+```
+
+### 2. Clean the data
+_Not required for this dataset
+
+### 3. Standardise the data
+Use scale() to standardize the feature columns of the iris dataset. Set this standardized version of the data as a new variable. _Note that because the variables in this dataset are of a fairly similar order of magnitude, there's no need to standardise - I'm doing it for practice.
+
+Check that the scaling worked by checking the variance of one of the new columns.
+
+
+```{r}
+#iris[,5]
+standardised.features <- scale(iris[,-5])
+var(standardised.features[,2]) # should be 1
+var(standardised.features[,4]) # should be 1
+
+# Join the standardized data with the response/target/label column (the column with the species names - which is in the unstandardized iris dataset)
+final.data <- cbind(standardised.features,iris[5])
+head(final.data)
+
+```
+
+
+### 4. Create training and test data
+
+Use the caTools library to split your standardized data into train and test sets. Use a 70/30 split.
+```{r}
+library(caTools)
+# Set a random  
+set.seed(101) 
+
+# Split up the sample, basically randomly assigns a booleans to a new column "sample"
+sample <- sample.split(final.data$Species, SplitRatio = 0.70) # SplitRatio = percent of sample==TRUE
+
+# Training Data
+train = subset(final.data, sample == TRUE)
+
+# Testing Data
+test = subset(final.data, sample == FALSE)
+
+head(train)
+```
+
+
+### 5. Build the `knn` model
+```{r}
+
+# Call the class library
+library(class)
+
+# Use the knn function to predict Species of the test set. Use k=1
+predicted.species <- knn(train[1:4],test[1:4],train$Species,k=1)
+head(predicted.species)
+```
+
+
+### 6. Identify the best k number
+```{r}
+# evaluate the model
+mean(test$Species != predicted.species)
+
+predicted.species <- NULL
+error.rate <- NULL
+
+for (i in 1:10) {
+  set.seed(101)
+  predicted.species <- knn(train[1:4],test[1:4],train$Species,k=i)
+   error.rate[i] <- mean(test$Species != predicted.species)
+}
+
+```
+
+```{r}
+library(ggplot2)
+library(plotly)
+k.values <- 1:10
+error.df <- data.frame(error.rate,k.values)
+errs <- ggplot(error.df,aes(x=k.values,y=error.rate)) + geom_point()
+ggplotly(errs)   
+```
+The lowest error rate starts when k==2. Using a larger k would slow down the function (though in this case, it's so small it hardly matters), so 2 is the optimum k.
+
+Further resources:
+[towardsdatascience](https://towardsdatascience.com/machine-learning-basics-with-the-k-nearest-neighbors-algorithm-6a6e71d01761)

@@ -1,0 +1,56 @@
+---
+title: "Support Vector Machines"
+output: html_notebook
+---
+
+## What is a Support Vector Machine?
+
+
+## What's the point of Support Vector Machines?
+
+
+cost = allows soft margins (i.e. you can ignore some values, or have values that are on the wrong side of the margin)
+
+
+gamma = 
+
+
+-----
+
+## get data
+```{r}
+library(ISLR)
+head(iris)
+```
+
+## 
+```{r}
+library(e1071)
+```
+
+
+## create model
+```{r}
+# model is equal to svm function(takes in the column you want to predict ~ the columns used for the prediction, the dataset)
+model <- svm(Species ~ ., data = iris)
+summary(model)
+```
+
+## predictions = create test data firs
+```{r}
+pred.values <- predict(model, iris)
+```
+
+
+## tuning
+```{r}
+tune.results <- tune(svm,train.x = iris[1:4], train.y = iris[,5],kernel='radial', ranges=list(cost=c(0.1,1.5,10), gamma=c(0.1,1,2)))
+summary(tune.results)
+```
+
+## redo the model using the best cost and gamma from the tuning
+```{r}
+tuned.svm <- svm(Species ~ ., data=iris, kernel='radial', cost=1.5, gamma=0.1)
+summary(tuned.svm)
+```
+

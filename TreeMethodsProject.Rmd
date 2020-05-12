@@ -1,0 +1,148 @@
+---
+title: "Tree Methods Project"
+output: html_notebook
+---
+
+## Get the Data
+```{r}
+library(ISLR)
+data("College")
+df <- College
+head(df)
+```
+
+## Explore the Data
+```{r}
+library(ggplot2)
+```
+
+```{r}
+ggplot(df, aes(x=`Room.Board`, y=`Grad.Rate`, col=Private)) + geom_point()
+```
+
+```{r}
+ggplot(df, aes(x=`F.Undergrad`, fill=Private)) + geom_histogram(col='black')
+```
+
+```{r}
+ggplot(df, aes(x=`Grad.Rate`, fill=Private)) + geom_histogram(col='black')
+```
+
+What college had a Graduation Rate of above 100%?
+
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+# odd <- df %>% filter(`Grad.Rate`>100)
+# oddjob <- df['Grad.Rate'] > 100
+subset(df,Grad.Rate > 100)
+
+```
+
+Change Cazenovia College's Grad Rate to 100
+```{r}
+df['Cazenovia College','Grad.Rate'] <- 100
+```
+
+rerun the histogram to check that Cazenovia College Grad Rate is not over 100
+```{r}
+ggplot(df, aes(x=`Grad.Rate`, fill=Private)) + geom_histogram(col='black')
+```
+
+## Train Test Split
+Split your data into training and testing sets 70/30. Use the caTools library to do this.
+```{r}
+library(caTools)
+```
+
+```{r}
+# Set a random  
+set.seed(101) 
+
+# Split up the sample, basically randomly assigns a boolean to a new column "sample"
+sample <- sample.split(df$Private, SplitRatio = 0.70) # SplitRatio = percent of sample==TRUE
+
+# Training Data
+train = subset(df, sample == TRUE)
+
+# Testing Data
+test = subset(df, sample == FALSE)
+
+head(train)
+
+head(test)
+```
+
+## Decision Tree
+Use the rpart library to build a decision tree to predict whether or not a school is Private. Remember to only build your tree off the training data.
+```{r}
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+```
+
+```{r}
+privateTree <- rpart(Private ~.,method='class',data = train)
+privateTree
+```
+
+## plot the tree using rpart.plot
+```{r}
+prp(privateTree)
+```
+
+## Use predict() to predict the Private label on the test data.
+```{r}
+privateTree.predictions <- predict(privateTree, test)
+head(privateTree.predictions)
+```
+
+Turn the No and Yes columns into one column to match the original Yes/No Label for a Private column.
+```{r}
+privateTree.predictions <- as.data.frame(privateTree.predictions)
+# Lots of ways to do this
+joiner <- function(x){
+    if (x>=0.5){
+        return('Yes')
+    }else{
+        return("No")
+    }
+}
+privateTree.predictions$Private <- sapply(privateTree.predictions$Yes,joiner)
+head(privateTree.predictions)
+```
+
+## Now use table() to create a confusion matrix of your tree model.
+```{r}
+table(privateTree.predictions$Private,test$Private)
+```
+
+## Now use randomForest() to build out a model to predict Private class. Add importance=TRUE as a parameter in the model. (Use help(randomForest) to find out what this does.
+
+```{r}
+rf.model <- randomForest(Private ~ ., data=train, importance=TRUE)
+rf.model
+```
+
+```{r}
+rf.model$confusion
+```
+
+```{r}
+rf.model$importance
+```
+
+## Predictions
+Now use your random forest model to predict on your test set!
+
+```{r}
+p <- predict(rf.model,test)
+```
+
+```{r}
+table(p,test$Private)
+```
+

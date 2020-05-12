@@ -1,0 +1,127 @@
+---
+title: "Support Vector Machines Project"
+output: html_notebook
+---
+# Support Vector Machines Project
+
+For this project we will be exploring publicly available data from LendingClub.com. Lending Club connects people who need money (borrowers) with people who have money (investors). Hopefully, as an investor you would want to invest in people who showed a profile of having a high probability of paying you back. We will try to create a model that will help predict this.
+
+# Imports and get data
+
+## Imports
+```{r}
+library(ggplot2)
+library(e1071)
+library(readr)
+library(dplyr)
+library(caTools)
+```
+
+
+## Get the data and inspect it
+```{r}
+loans <- read.csv('Training Exercises/Machine Learning Projects/CSV files for ML Projects/loan_data.csv')
+head(loans)
+```
+
+```{r}
+str(loans)
+```
+
+```{r}
+summary(loans)
+```
+
+## Convert the following columns to categorical data using `factor()`
+inq.last.6mths
+delinq.2yrs
+pub.rec
+not.fully.paid
+credit.policy
+```{r}
+loans <- loans %>% mutate(`inq.last.6mths`=factor(`inq.last.6mths`), `delinq.2yrs`=factor(`delinq.2yrs`), `pub.rec`=factor(`pub.rec`), `not.fully.paid`=factor(`not.fully.paid`), `credit.policy`=factor(`credit.policy`))
+head(loans)
+
+```
+
+
+# Exploratory Data Analysis
+
+## Create a histogram of fico scores colored by not.fully.paid
+```{r}
+ggplot(loans, aes(x=fico)) + geom_histogram(aes(fill=`not.fully.paid`), col='black') + scale_fill_manual(values = c('green','red'))
+# I changed the colours to green and red to show that not.fully.paid=0 is the good value.
+```
+A fico score is a credit score - the higher the number, the better the score. 850 is the maximum score. Anything above 670 is good, above 740 is very good, and above 800 is exceptional. [Bankrate](https://www.bankrate.com/finance/credit/what-is-good-fico-score.aspx) The results of the histogram tie in with this - the most frequent scores are somewhere between 670 and 720. Note that the data is skewed to the right, and that the count gradually decreases as the fico score reaches 850. On the other side, almost no-one has a score below ca. 650. It almost looks like the data have been chopped off below 650. This suggests there could be a factor that excludes people with <650 fico points from the dataset. My guess is that people with low fico scores are less likely to be given credit. What I find strange is that the count for very low fico scores is not zero - how is it possible that someone with a really low fico score gets credit?!
+
+
+## Create a barplot of purpose counts, colored by not.fully.paid. Use position=dodge in the geom_bar argument
+```{r}
+ggplot(loans, aes(x=purpose)) + geom_bar(aes(fill=`not.fully.paid`), col='black', position='dodge') + scale_fill_manual(values = c('green','red')) + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+I'm not sure whether this bar char tells us much. The most popular use of credit is to consolidate debt, but that still leaves the question of what the original debt was for. The second and third most popular are __other__ and __credit_card__, which also faily to explain what the purpose of the debt was.
+
+
+## Create a scatterplot of fico score versus int.rate. Does the trend make sense? Play around with the color scheme if you want.
+```{r}
+ggplot(loans, aes(x=fico, y=`int.rate`)) + geom_point(aes(col=`not.fully.paid`), alpha=0.5) + scale_fill_manual(values = c('green','red')) 
+```
+The results are in line with what I would expect. The higher the fico, the lower the interest rate. Blue dots (people who did not fully pay) are also more frequent as the interest rate increases.
+
+
+# Build the Model
+ 
+
+## Train and Test Sets
+Split your data into training and test sets using the caTools library.
+```{r}
+set.seed(101)
+
+spl = sample.split(loans$not.fully.paid, 0.7)
+
+train = subset(loans, spl == TRUE)
+
+test = subset(loans, spl == FALSE)
+```
+
+## Now use the svm() function to train a model on your training set.
+```{r}
+model <- svm(not.fully.paid ~ ., data = train)
+```
+
+## Get a summary of the model.
+```{r}
+summary(model)
+```
+
+
+## Use predict to predict new values from the test set using your model. 
+```{r}
+predicted.values <- predict(model,test[1:13])
+table(predicted.values,test$not.fully.paid)
+```
+
+# Tune the model
+
+## Use the tune() function to test out different cost and gamma values. 
+```{r}
+tune.results <- tune(svm,train.x=not.fully.paid~., data=train,kernel='radial',
+                  ranges=list(cost=c(1, 10), gamma=c(0.1, 1)))
+
+summary(tune.results)
+```
+
+## create a tuned model
+```{r}
+tuned.model <- svm(not.fully.paid ~ ., data = train, cost=10, gamma=0.1)
+```
+
+
+```{r}
+tuned.predictions <- predict(not.fully.paid ~ ., data=train, )
+```
+
+
+
+
+

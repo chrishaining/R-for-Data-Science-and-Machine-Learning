@@ -1,0 +1,49 @@
+---
+title: "K-Nearest Neighbour Practice"
+output: html_notebook
+---
+
+In this notebook I practise the K-nearest neighbour method, using the `Default` dataset from the ISLR library. 
+
+The question I want to answer is:
+
+Can we identify whether a given person will default?
+
+## 1. Get the data
+```{r}
+library(ISLR)
+head(Credit)
+```
+
+### 2. Clean the data
+The `student` variable is non-numeric, which could be a problem. I don't think converting it to 0/1 would work (would it? let's try)
+
+```{r}
+
+  
+```
+
+
+
+
+### 3. Standardise the data
+Use scale() to standardize the feature columns of the dataset. Set this standardized version of the data as a new variable. _Note that because the variables in this dataset are of a fairly similar order of magnitude, there's no need to standardise - I'm doing it for practice.
+
+Check that the scaling worked by checking the variance of one of the new columns.
+
+
+### 4. Create training and test data
+
+Use the caTools library to split your standardized data into train and test sets. Use a 70/30 split.
+
+
+
+
+
+### 5. Build the `knn` model
+
+
+
+
+### 6. Identify the best k number
+

@@ -118,7 +118,8 @@ tuned.model <- svm(not.fully.paid ~ ., data = train, cost=10, gamma=0.1)
 
 
 ```{r}
-tuned.predictions <- predict(not.fully.paid ~ ., data=train, )
+tuned.predictions <- predict(tuned.model, test[1:13])
+table(tuned.predictions, test$not.fully.paid)
 ```
 
 

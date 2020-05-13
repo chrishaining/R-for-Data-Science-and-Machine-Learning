@@ -1,0 +1,43 @@
+---
+title: "K Means Clustering"
+output: html_notebook
+---
+
+K Means Clustering is an __unsupervised machine learning__ method.
+
+## get data
+```{r}
+library(ISLR)
+head(iris)
+```
+ 
+## EDA
+```{r}
+library(ggplot2)
+ggplot(iris, aes(Petal.Length, Petal.Width, color=Species)) + geom_point(size=4, alpha=0.4)
+
+```
+
+```{r}
+set.seed(101)
+
+# arguments for kmeans: dataset, K, number of iterations
+irisCluster <- kmeans(iris[,1:4], 3, nstart = 20)
+
+irisCluster
+```
+
+## compare the cluster to the actual labels
+```{r}
+table(irisCluster$cluster, iris$Species)
+```
+The row numbers relate to the numbers in __clustering vector__. So, in the table there are 50 setosa (row 3), and this matches the number of __3__ found in the clustering vector.
+
+## plot clusters 
+```{r}
+library(cluster)
+clusplot(iris, irisCluster$cluster, color=TRUE, shade=TRUE, labels=0, lines=0)
+
+```
+
+

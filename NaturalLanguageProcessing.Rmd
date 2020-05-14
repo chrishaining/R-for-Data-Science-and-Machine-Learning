@@ -1,0 +1,95 @@
+---
+title: "Natural Language Processing 2"
+output: html_notebook
+---
+ 
+[sthda](http://www.sthda.com/english/wiki/word-cloud-generator-in-r-one-killer-function-to-do-everything-you-need)
+
+[towards data science](https://towardsdatascience.com/create-a-word-cloud-with-r-bde3e7422e8a)
+
+## import libraries
+* tm for text mining
+* SnowballC for text stemming
+* wordcloud for generating word cloud images
+* RCurl and XML packages to download and parse web pages
+* RColorBrewer for color palettes
+```{r}
+
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(wordcloud2)
+library(RColorBrewer)
+library(RCurl)
+library(XML)
+library(readr)
+library(dplyr)
+
+```
+
+
+## get data
+```{r}
+
+recommendations <- read_tsv('FATFrecommendations.txt')
+
+```
+
+
+
+## turn the data into a corpus
+```{r}
+
+recommendationsCorpus <- Corpus(VectorSource(recommendations))
+ 
+
+```
+
+## clean the data
+```{r}
+
+recommendationsCorpus <- recommendationsCorpus %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+recommendationsCorpus <- tm_map(recommendationsCorpus, content_transformer(tolower))
+recommendationsCorpus <- tm_map(recommendationsCorpus, removeWords, stopwords("english"))
+
+
+```
+
+## create a document-term-matrix
+```{r}
+
+dtm <- TermDocumentMatrix(recommendationsCorpus)
+matrix <- as.matrix(dtm)
+words <- sort(rowSums(matrix), decreasing = T)
+df <- data.frame(word = names(words), freq=words)
+
+```
+
+## make the word cloud
+```{r}
+
+set.seed(1234) # for reproducibility 
+wordcloud(words = df$word, freq = df$freq, min.freq = 100, max.words=200, scale=c(2.7,0.23), random.order=FALSE, rot.per=0.35, colors=brewer.pal(8, "Dark2"))
+
+```
+
+## make a word cloud using the `wordcloud2` library, which has additional features.
+
+```{r}
+
+wordcloud2(data=df, size=1.6, color='random-dark')
+
+```
+
+## change the shape of the cloud
+```{r}
+
+wordcloud2(data=df, size = 0.7, shape = 'star')
+
+```
+
+
+

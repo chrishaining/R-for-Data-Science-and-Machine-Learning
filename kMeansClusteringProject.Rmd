@@ -135,4 +135,3 @@ table(wine$Label, wine.cluster$cluster)
 Red is easier to cluster. 
 
 
-
